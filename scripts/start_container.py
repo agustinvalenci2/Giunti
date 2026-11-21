@@ -12,7 +12,7 @@ def main():
     subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True)
     command = sys.argv[1:] or [
         sys.executable, "-m", "uvicorn", "backend.main:app",
-        "--host", "0.0.0.0", "--port", "8000",
+        "--host", "0.0.0.0", "--port", os.environ.get("PORT", "8000"),
     ]
     os.execvp(command[0], command)
 

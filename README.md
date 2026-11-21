@@ -24,6 +24,10 @@ docker compose up --build -d
 
 Abrí <http://localhost:8000/>. El Dockerfile compila React en una etapa Node y copia el resultado a una imagen Python que ejecuta FastAPI. Frontend y API comparten el puerto 8000, sin necesitar un segundo servidor. Al arrancar se aplican las migraciones de Alembic; si una migración falla, el servidor no inicia. El proceso se ejecuta con un usuario sin privilegios y el healthcheck comprueba tanto la API como la página inicial.
 
+El servidor y el healthcheck leen `PORT` al arrancar; si no está definida, usan `8000`. Compose fija `PORT=8000` para coincidir con su mapeo local. En Vercel con el preset **Container**, la imagen respeta el puerto que espera la plataforma (por defecto `80`): no hace falta forzarlo a `8000`. Después de cambiar estos archivos, subí los cambios al repositorio conectado y desplegá una nueva versión para reconstruir la imagen. Referencia: [puerto del contenedor en Vercel](https://vercel.com/docs/functions/runtimes/container#port-resolution).
+
+Esto corrige el arranque, pero Vercel no conserva el volumen de Compose: usuarios, resultados y documentos todavía necesitan almacenamiento persistente externo para ese despliegue.
+
 Compose toma de `.env` la clave y configuración de Gemini. Si no existe `.env`, copiá `.env.example` y completá `GEMINI_API_KEY` antes de procesar documentos. El archivo `.env`, las bases locales, los archivos subidos y los backups se excluyen del contexto de construcción y de la imagen.
 
 Los datos del contenedor se guardan en el volumen persistente `app-data`, bajo `/data/app.sqlite3` y `/data/media`. **La primera ejecución crea una biblioteca vacía:** no importa ni modifica automáticamente los usuarios/documentos de la base local del proyecto. Los datos creados en Docker se conservan al reconstruir o detener los contenedores con `docker compose down`. Eliminar el volumen elimina esos datos; no uses `down -v` si querés conservarlos.
@@ -191,6 +195,7 @@ Los archivos `examples/cuestionario_inventado.{pdf,docx,xlsx,xls}` son inventado
 | Variable | Valor por defecto / uso |
 | --- | --- |
 | `APP_DEBUG` | `true` en local; usar `false` con HTTPS en producción |
+| `PORT` | Puerto del contenedor; `8000` si no se define, o el valor indicado por el hosting |
 | `APP_ORIGINS` | Orígenes permitidos para escrituras; localhost:8000 y localhost:5173 en local |
 | `GEMINI_API_KEY` | Credencial del servidor para procesar |
 | `GEMINI_MODEL` | `gemini-2.5-flash-lite` |

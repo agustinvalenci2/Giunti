@@ -6,6 +6,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     environment:
+      PORT: "8000"
       # Local HTTP needs non-Secure cookies. Use false behind HTTPS in production.
       APP_DEBUG: "${APP_DEBUG:-true}"
       APP_ORIGINS: "${APP_ORIGINS:-http://127.0.0.1:8000,http://localhost:8000}"

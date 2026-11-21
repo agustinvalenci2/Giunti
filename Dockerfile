@@ -36,7 +36,8 @@ COPY --from=frontend-build /frontend/dist ./frontend/dist
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD ["python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/api/health', timeout=3).close(); urlopen('http://127.0.0.1:8000/', timeout=3).close()"]
+    CMD ["python", "-c", "import os; from urllib.request import urlopen; base = 'http://127.0.0.1:' + os.environ.get('PORT', '8000'); urlopen(base + '/api/health', timeout=3).close(); urlopen(base + '/', timeout=3).close()"]
 
 ENTRYPOINT ["python", "-m", "scripts.start_container"]
-CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Let the entrypoint choose the server command using the runtime PORT variable.
+CMD []
