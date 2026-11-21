@@ -1,5 +1,7 @@
 # Cuaderno: FastAPI + React + Gemini
 
+**Aplicación en línea:** [https://giunti-one.vercel.app](https://giunti-one.vercel.app)
+
 Aplicación para guardar cuestionarios PDF, DOCX, XLSX y XLS, extraer sus preguntas con Gemini y conservar el JSON por usuario. El backend usa **FastAPI + SQLAlchemy + Alembic** y el frontend **React + Vite**. No requiere Django ni Jinja2. Este stack coincide con el solicitado en la prueba técnica.
 
 La interfaz, los mensajes de la API y las etiquetas de los tipos de pregunta están en inglés estadounidense (`en-US`), con fechas en formato de Estados Unidos. Las preguntas extraídas conservan el idioma del documento y el JSON mantiene el contrato de la prueba técnica. Los mensajes conocidos de errores de procesamiento guardados en español se muestran traducidos al consultar la biblioteca.
@@ -216,6 +218,8 @@ Límites: 100 páginas PDF; 150.000 caracteres de Office; 5000 filas y 100 colum
 
 ## Despliegue
 
-No hay una publicación externa realizada. Para un servidor Python con HTTPS, instalar `requirements.txt`, compilar React con `npm --prefix frontend ci` y `npm --prefix frontend run build`, ejecutar `alembic upgrade head` y arrancar `uvicorn backend.main:app --host 0.0.0.0 --port 8000` detrás de un proxy. Configurar `APP_DEBUG=false`, `APP_ORIGINS` con el dominio real, y disco persistente para base y archivos. Mantener una instancia con SQLite, permitir el tiempo de extracción y limitar las peticiones en el proxy. No publicar `MEDIA_ROOT`. El frontend se sirve desde el mismo origen que la API.
+La aplicación está publicada en [Vercel](https://giunti-one.vercel.app).
+
+Para un servidor Python con HTTPS, instalar `requirements.txt`, compilar React con `npm --prefix frontend ci` y `npm --prefix frontend run build`, ejecutar `alembic upgrade head` y arrancar `uvicorn backend.main:app --host 0.0.0.0 --port 8000` detrás de un proxy. Configurar `APP_DEBUG=false`, `APP_ORIGINS` con el dominio real, y disco persistente para base y archivos. Mantener una instancia con SQLite, permitir el tiempo de extracción y limitar las peticiones en el proxy. No publicar `MEDIA_ROOT`. El frontend se sirve desde el mismo origen que la API.
 
 Las referencias de implementación son la [documentación de FastAPI](https://fastapi.tiangolo.com/), [SQLAlchemy](https://docs.sqlalchemy.org/en/20/orm/quickstart.html), [React](https://react.dev/learn/build-a-react-app-from-scratch) y [Vite 6](https://v6.vite.dev/guide/).
