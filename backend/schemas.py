@@ -23,31 +23,31 @@ class Item(StrictModel):
     def consistent_answers(self):
         values = [(type(a.valor), a.valor) for a in self.alternativas]
         if len(values) != len(set(values)):
-            raise ValueError("Las alternativas deben tener valores únicos.")
+            raise ValueError("Answer choices must have unique values.")
         if self.tipo == "desarrollo":
             if self.alternativas or self.respuesta_correcta is not None:
-                raise ValueError("Desarrollo requiere alternativas vacías y respuesta_correcta null.")
+                raise ValueError("Open-ended questions require an empty alternativas list and a null respuesta_correcta.")
         elif not self.alternativas:
-            raise ValueError("Los ítems cerrados requieren alternativas.")
+            raise ValueError("Closed-ended questions require answer choices.")
         if self.tipo == "verdadero_falso" and len(self.alternativas) != 2:
-            raise ValueError("Verdadero/falso requiere dos alternativas.")
+            raise ValueError("True/false questions require two answer choices.")
         if self.respuesta_correcta is not None and self.tipo != "emparejamiento":
             if (type(self.respuesta_correcta), self.respuesta_correcta) not in values:
-                raise ValueError("La respuesta correcta debe identificar una alternativa.")
+                raise ValueError("The correct answer must identify an answer choice.")
         return self
 
 
 class Questionnaire(StrictModel):
     titulo: str = Field(min_length=1)
-    idioma: str = Field(pattern=r"^[a-z]{2}$", description="Código ISO 639-1: es, it, en, etc.")
+    idioma: str = Field(pattern=r"^[a-z]{2}$", description="ISO 639-1 language code: es, it, en, etc.")
     total_items: int = Field(ge=0)
     items: list[Item]
 
     @model_validator(mode="after")
     def consistent_items(self):
         if self.total_items != len(self.items):
-            raise ValueError("total_items no coincide con items.")
+            raise ValueError("total_items does not match the number of items.")
         numbers = [item.numero for item in self.items]
         if len(numbers) != len(set(numbers)):
-            raise ValueError("Los números de ítem deben ser únicos.")
+            raise ValueError("Question numbers must be unique.")
         return self

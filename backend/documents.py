@@ -10,19 +10,20 @@ from sqlalchemy.orm import Session
 
 from .config import settings
 from .database import get_db
+from .messages import LEGACY_PROCESSING_ERRORS
 from .models import AuthSession, UserDocument, utcnow
 from .security import current_session, mutation_session
 from .services.files import ValidationError, validate_upload
 from .services.pipeline import process_document, save_upload
 from .services.storage import document_path
 
-router = APIRouter(prefix="/api/documents", tags=["Documentos"])
+router = APIRouter(prefix="/api/documents", tags=["Documents"])
 
 
 def owned_input(db, identifier, user_id):
     entry = db.scalar(select(UserDocument).where(UserDocument.id == str(identifier), UserDocument.user_id == user_id))
     if not entry:
-        raise HTTPException(404, "No se encontró el documento.")
+        raise HTTPException(404, "Document not found.")
     return entry
 
 
@@ -34,7 +35,8 @@ def document_payload(entry, include_result=False):
     payload = {
         "id": entry.id, "original_name": entry.document.original_name, "extension": entry.document.extension,
         "size": entry.document.size, "status": entry.status, "created_at": timestamp(entry.created_at),
-        "completed_at": timestamp(entry.completed_at), "error_message": entry.error_message,
+        "completed_at": timestamp(entry.completed_at),
+        "error_message": LEGACY_PROCESSING_ERRORS.get(entry.error_message, entry.error_message),
         "total_items": entry.result.get("total_items") if entry.result else None,
         "can_process": entry.status in ("uploaded", "failed") or bool(entry.status == "processing" and entry.started_at and entry.started_at < utcnow() - timedelta(minutes=5)),
     }
@@ -58,7 +60,7 @@ def upload_document(file: UploadFile = File(...), public_content: bool = Form(..
                     session: AuthSession = Depends(mutation_session), db: Session = Depends(get_db)):
     try:
         if not public_content:
-            raise HTTPException(422, "Confirmá que el material es inventado o de dominio público y no contiene datos personales.")
+            raise HTTPException(422, "Confirm that the material is fictional or in the public domain and contains no personal information.")
         filename = re.sub(r"[\x00-\x1f\x7f]", "", (file.filename or "").replace("\\", "/").split("/")[-1])[:255]
         data = file.file.read(settings.MAX_UPLOAD_BYTES + 1)
         validated = validate_upload(filename, data)
@@ -86,9 +88,9 @@ def process(identifier: UUID, session: AuthSession = Depends(mutation_session), 
 def download_json(identifier: UUID, session: AuthSession = Depends(current_session), db: Session = Depends(get_db)):
     entry = owned_input(db, identifier, session.user_id)
     if entry.status != "completed" or entry.result is None:
-        raise HTTPException(404, "El resultado todavía no está disponible.")
+        raise HTTPException(404, "The results are not available yet.")
     return Response(json.dumps(entry.result, ensure_ascii=False, indent=2), media_type="application/json",
-                    headers={"Content-Disposition": f'attachment; filename="cuestionario-{entry.id}.json"', "Cache-Control": "private, no-store"})
+                    headers={"Content-Disposition": f'attachment; filename="questionnaire-{entry.id}.json"', "Cache-Control": "private, no-store"})
 
 
 @router.get("/{identifier}/original")
@@ -96,6 +98,6 @@ def download_original(identifier: UUID, session: AuthSession = Depends(current_s
     entry = owned_input(db, identifier, session.user_id)
     path = document_path(entry.document)
     if not path.is_file():
-        raise HTTPException(404, "No se encontró el archivo original.")
+        raise HTTPException(404, "Original file not found.")
     return FileResponse(path, filename=entry.document.original_name, media_type="application/octet-stream",
                         headers={"Cache-Control": "private, no-store"})

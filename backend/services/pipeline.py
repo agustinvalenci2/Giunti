@@ -65,7 +65,7 @@ def process_document(db: Session, entry: UserDocument):
     try:
         result = extract_questionnaire(document)
     except Exception as exc:
-        message = str(exc) if isinstance(exc, ProcessingError) else "Ocurrió un error al procesar el archivo. Podés reintentar."
+        message = str(exc) if isinstance(exc, ProcessingError) else "An error occurred while processing the file. Try again."
         if not isinstance(exc, ProcessingError):
             logger.error("Processing failed for input %s (%s)", entry.id, type(exc).__name__)
         values = {"status": "failed", "error_message": message}

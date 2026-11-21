@@ -76,7 +76,7 @@ def test_invalid_or_empty_results_not_cached(db, entry, gemini_mock, raw):
 def test_quota_error_is_safe(db, entry, gemini_mock):
     gemini_mock[1].models.generate_content.side_effect = ClientError(429, {"error": {"message": "secret-sensitive-provider-body"}})
     process_document(db, entry)
-    assert entry.status == "failed" and "cuota" in entry.error_message and "secret" not in entry.error_message
+    assert entry.status == "failed" and "quota" in entry.error_message and "secret" not in entry.error_message
 
 
 def test_live_attempt_cannot_be_duplicated_but_stale_attempt_can_retry(db, entry, gemini_mock):
@@ -146,6 +146,18 @@ def test_expired_session_rejected(authenticated, db):
 
 def test_cross_origin_mutations_rejected(authenticated):
     assert authenticated.post("/api/auth/logout", headers={"Origin": "https://untrusted.example"}).status_code == 403
+
+
+def test_saved_processing_errors_are_displayed_in_english(authenticated, db, entry):
+    original_message = "No se detectaron preguntas en el documento."
+    entry.status = "failed"
+    entry.error_message = original_message
+    db.commit()
+    response = authenticated.get(f"/api/documents/{entry.id}")
+    assert response.status_code == 200
+    assert response.json()["error_message"] == "No questions were found in the document."
+    db.refresh(entry)
+    assert entry.error_message == original_message
 
 
 def test_upload_requires_csrf_and_consent(authenticated, pdf_bytes):

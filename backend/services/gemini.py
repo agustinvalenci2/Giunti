@@ -32,7 +32,7 @@ class ProcessingError(Exception):
 
 def extract_questionnaire(document):
     if not settings.GEMINI_API_KEY:
-        raise ProcessingError("Falta configurar GEMINI_API_KEY en el servidor. Tu archivo quedó guardado.")
+        raise ProcessingError("GEMINI_API_KEY is not configured on the server. Your file has been saved.")
     if document.extension == ".pdf":
         with document_path(document).open("rb") as file:
             content = types.Part.from_bytes(data=file.read(), mime_type="application/pdf")
@@ -60,18 +60,18 @@ def extract_questionnaire(document):
             )
     except errors.APIError as exc:
         if exc.code == 429:
-            raise ProcessingError("Se agotó temporalmente la cuota de Gemini. El archivo está guardado; reintentá más tarde.") from exc
+            raise ProcessingError("The Gemini quota has been temporarily exceeded. Your file is saved. Try again later.") from exc
         if exc.code in (401, 403):
-            raise ProcessingError("Gemini rechazó la credencial. Revisá la API key y los permisos del proyecto.") from exc
+            raise ProcessingError("Gemini rejected the credentials. Check the API key and project permissions.") from exc
         if exc.code == 404:
-            raise ProcessingError("El modelo configurado no está disponible. Revisá GEMINI_MODEL.") from exc
-        raise ProcessingError("Gemini no pudo procesar el documento. Podés reintentar más tarde.") from exc
+            raise ProcessingError("The configured model is unavailable. Check GEMINI_MODEL.") from exc
+        raise ProcessingError("Gemini could not process the document. Try again later.") from exc
     except HTTPError as exc:
-        raise ProcessingError("No se pudo conectar con Gemini o se agotó el tiempo de espera. Podés reintentar.") from exc
+        raise ProcessingError("Unable to connect to Gemini, or the request timed out. Try again.") from exc
     try:
         questionnaire = Questionnaire.model_validate_json(response.text or "")
     except (ValidationError, ValueError) as exc:
-        raise ProcessingError("Gemini devolvió una respuesta incompleta o inválida. No se guardó como resultado; podés reintentar.") from exc
+        raise ProcessingError("Gemini returned an incomplete or invalid response. No results were saved. Try again.") from exc
     if not questionnaire.items:
-        raise ProcessingError("No se detectaron preguntas en el documento.")
+        raise ProcessingError("No questions were found in the document.")
     return questionnaire.model_dump(mode="json")

@@ -29,7 +29,7 @@ def test_invalid_files_rejected(name, content):
 
 def test_size_limit(pdf_bytes, settings, monkeypatch):
     monkeypatch.setattr(settings, "MAX_UPLOAD_BYTES", 20)
-    with pytest.raises(ValidationError, match="máximo"):
+    with pytest.raises(ValidationError, match="no larger than"):
         validate_upload("large.pdf", pdf_bytes)
 
 
@@ -39,7 +39,7 @@ def test_encrypted_pdf_rejected(pdf_bytes):
     writer.encrypt("private")
     stream = BytesIO()
     writer.write(stream)
-    with pytest.raises(ValidationError, match="contraseña"):
+    with pytest.raises(ValidationError, match="password-protected"):
         validate_upload("secret.pdf", stream.getvalue())
 
 
@@ -79,7 +79,7 @@ def test_docx_paragraph_and_table_order():
 def test_empty_spreadsheet_rejected():
     stream = BytesIO()
     openpyxl.Workbook().save(stream)
-    with pytest.raises(ValidationError, match="no contiene"):
+    with pytest.raises(ValidationError, match="contains no"):
         validate_upload("empty.xlsx", stream.getvalue())
 
 
@@ -87,5 +87,5 @@ def test_office_disguised_as_other_type_is_rejected():
     stream = BytesIO()
     with ZipFile(stream, "w") as archive:
         archive.writestr("unrelated.txt", "text")
-    with pytest.raises(ValidationError, match="formato"):
+    with pytest.raises(ValidationError, match="format"):
         validate_upload("wrong.docx", stream.getvalue())

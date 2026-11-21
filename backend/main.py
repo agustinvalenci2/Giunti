@@ -15,15 +15,15 @@ def create_app():
         if request.method not in {"GET", "HEAD", "OPTIONS"}:
             origin = request.headers.get("origin")
             if (origin and origin.rstrip("/") not in settings.allowed_origins) or request.headers.get("sec-fetch-site") == "cross-site":
-                return JSONResponse({"detail": "Origen no permitido."}, status_code=403)
+                return JSONResponse({"detail": "Origin not allowed."}, status_code=403)
         if request.method == "POST":
             length = request.headers.get("content-length")
             if length:
                 try:
                     if int(length) > settings.MAX_UPLOAD_BYTES + 1024 * 1024:
-                        return JSONResponse({"detail": "El archivo supera el tamaño permitido."}, status_code=413)
+                        return JSONResponse({"detail": "The file exceeds the size limit."}, status_code=413)
                 except ValueError:
-                    return JSONResponse({"detail": "Tamaño de petición inválido."}, status_code=400)
+                    return JSONResponse({"detail": "Invalid request size."}, status_code=400)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -42,7 +42,7 @@ def create_app():
     app.include_router(auth.router)
     app.include_router(documents.router)
 
-    @app.get("/api/health", tags=["Estado"])
+    @app.get("/api/health", tags=["Status"])
     def health():
         return {"status": "ok", "framework": "FastAPI"}
 
@@ -54,10 +54,10 @@ def create_app():
     @app.get("/{path:path}", include_in_schema=False)
     def frontend(path: str):
         if path.split("/")[0] in {"api", "assets", "media", "private-media", "admin"}:
-            raise HTTPException(404, "Recurso no encontrado.")
+            raise HTTPException(404, "Resource not found.")
         index = settings.frontend_dist / "index.html"
         if not index.is_file():
-            raise HTTPException(503, "Compilá el frontend con npm run build o abrí Vite en http://127.0.0.1:5173.")
+            raise HTTPException(503, "Build the frontend with npm run build or open Vite at http://127.0.0.1:5173.")
         return FileResponse(index, headers={"Cache-Control": "no-cache"})
 
     return app

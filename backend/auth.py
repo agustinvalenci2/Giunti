@@ -12,7 +12,7 @@ from .models import AuthSession, User
 from .security import (COOKIE_NAME, DUMMY_HASH, create_session, current_session,
                        hash_password, mutation_session, verify_password)
 
-router = APIRouter(prefix="/api/auth", tags=["Usuarios"])
+router = APIRouter(prefix="/api/auth", tags=["Users"])
 
 
 class LoginInput(BaseModel):
@@ -28,14 +28,14 @@ class RegisterInput(LoginInput):
     @classmethod
     def valid_username(cls, value):
         if not re.fullmatch(r"[\w.@+-]+", value):
-            raise ValueError("Usá letras, números o los caracteres @ . + - _.")
+            raise ValueError("Use letters, numbers, or these characters: @ . + - _.")
         return value
 
     @field_validator("password")
     @classmethod
     def valid_password(cls, value):
         if value.isdecimal() or value.lower() in {"password123", "contraseña123", "qwerty12345", "1234567890"}:
-            raise ValueError("Elegí una contraseña menos predecible.")
+            raise ValueError("Choose a less predictable password.")
         return value
 
 
@@ -49,7 +49,7 @@ def session_payload(session, user=None):
 
 def require_json(request):
     if request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
-        raise HTTPException(415, "Esta operación requiere JSON.")
+        raise HTTPException(415, "This request requires JSON.")
 
 
 @router.post("/register", status_code=201)
@@ -62,7 +62,7 @@ def register(data: RegisterInput, request: Request, response: Response, db: Sess
         session = create_session(db, user, response, request.cookies.get(COOKIE_NAME))
     except IntegrityError:
         db.rollback()
-        raise HTTPException(409, "Ese nombre de usuario ya está registrado.")
+        raise HTTPException(409, "That username is already taken.")
     return session_payload(session, user)
 
 
@@ -72,7 +72,7 @@ def login(data: LoginInput, request: Request, response: Response, db: Session = 
     user = db.scalar(select(User).where(User.username == data.username))
     valid = verify_password(data.password, user.password_hash if user else DUMMY_HASH)
     if not user or not valid or not user.is_active:
-        raise HTTPException(401, "El usuario o la contraseña no son correctos.")
+        raise HTTPException(401, "The username or password is incorrect.")
     if user.password_hash.startswith("pbkdf2_sha256$"):
         user.password_hash = hash_password(data.password)
     session = create_session(db, user, response, request.cookies.get(COOKIE_NAME))

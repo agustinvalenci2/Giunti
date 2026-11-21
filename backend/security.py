@@ -64,11 +64,11 @@ def current_session(request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get(COOKIE_NAME, "")
     session = db.get(AuthSession, token_digest(token)) if token else None
     if session is None or session.expires_at <= utcnow() or not session.user.is_active:
-        raise HTTPException(401, "Ingresá a tu cuenta para continuar.")
+        raise HTTPException(401, "Sign in to your account to continue.")
     return session
 
 
 def mutation_session(request: Request, session: AuthSession = Depends(current_session)):
     if not hmac.compare_digest(request.headers.get("X-CSRF-Token", ""), session.csrf_token):
-        raise HTTPException(403, "La sesión de seguridad cambió. Actualizá la página e intentá nuevamente.")
+        raise HTTPException(403, "Your security session has changed. Refresh the page and try again.")
     return session

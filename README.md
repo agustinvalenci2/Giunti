@@ -2,6 +2,8 @@
 
 Aplicación para guardar cuestionarios PDF, DOCX, XLSX y XLS, extraer sus preguntas con Gemini y conservar el JSON por usuario. El backend usa **FastAPI + SQLAlchemy + Alembic** y el frontend **React + Vite**. No requiere Django ni Jinja2. Este stack coincide con el solicitado en la prueba técnica.
 
+La interfaz, los mensajes de la API y las etiquetas de los tipos de pregunta están en inglés estadounidense (`en-US`), con fechas en formato de Estados Unidos. Las preguntas extraídas conservan el idioma del documento y el JSON mantiene el contrato de la prueba técnica. Los mensajes conocidos de errores de procesamiento guardados en español se muestran traducidos al consultar la biblioteca.
+
 ## Arranque en esta carpeta
 
 Las dependencias están instaladas, el frontend está compilado y los datos anteriores ya fueron importados. Desde PowerShell, en la raíz:

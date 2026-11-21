@@ -49,7 +49,7 @@ def migrate(source: Path, db):
                 id=str(uuid.UUID(row["id"])), user_id=row["user_id"], document_id=str(uuid.UUID(row["document_id"])),
                 sha256=row["sha256"], status="failed" if interrupted else row["status"],
                 result=json.loads(row["result"]) if row["result"] else None,
-                error_message="El procesamiento fue interrumpido por la migración. Podés reintentar." if interrupted else row["error_message"],
+                error_message="Processing was interrupted during migration. Try again." if interrupted else row["error_message"],
                 model_name=row["model_name"], prompt_version=row["prompt_version"],
                 attempt_id=str(uuid.UUID(row["attempt_id"])) if row["attempt_id"] else None,
                 started_at=parse_date(row["started_at"]), completed_at=parse_date(row["completed_at"]), created_at=parse_date(row["created_at"]),

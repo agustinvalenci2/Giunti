@@ -52,7 +52,7 @@ def test_other_origins_cannot_bypass_allowlist_with_headers(client, vercel_origi
         "X-Forwarded-Proto": "https",
     })
     assert response.status_code == 403
-    assert response.json()["detail"] == "Origen no permitido."
+    assert response.json()["detail"] == "Origin not allowed."
 
 
 def test_trusted_origin_still_requires_csrf(client, vercel_origins):

@@ -16,14 +16,14 @@ export async function api(path, options = {}) {
     });
   } catch (cause) {
     if (cause.name === 'AbortError') throw cause;
-    throw new Error('No se pudo conectar con el servidor. Verificá la conexión e intentá nuevamente.');
+    throw new Error('Unable to connect to the server. Check your connection and try again.');
   }
   if (response.status === 204) return null;
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     const detail = data.detail;
     const message = Array.isArray(detail) ? detail.map(e => `${e.loc.at(-1)}: ${e.msg}`).join(' · ') : detail;
-    const error = new Error(message || 'No se pudo completar la operación.');
+    const error = new Error(message || 'Unable to complete the request.');
     error.status = response.status;
     if (response.status === 401 && !['/auth/login', '/auth/register', '/auth/me'].includes(path)) {
       window.dispatchEvent(new Event('session-expired'));
