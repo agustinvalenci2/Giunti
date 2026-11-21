@@ -28,6 +28,10 @@ El servidor y el healthcheck leen `PORT` al arrancar; si no está definida, usan
 
 Esto corrige el arranque, pero Vercel no conserva el volumen de Compose: usuarios, resultados y documentos todavía necesitan almacenamiento persistente externo para ese despliegue.
 
+Si la API responde **403 «Origen no permitido»** al enviar un formulario, configurá `APP_ORIGINS` en Vercel con el origen HTTPS exacto que aparece en el navegador (por ejemplo, `https://tu-proyecto.vercel.app`, sin `/cuenta/...` ni otras rutas), y volvé a desplegar. Para varias direcciones, separalas con comas. El backend también agrega automáticamente las URLs HTTPS informadas por `VERCEL_URL`, `VERCEL_BRANCH_URL` y `VERCEL_PROJECT_PRODUCTION_URL`; habilitá **Enable access to System Environment Variables** en el proyecto para que estén disponibles. Los dominios personalizados adicionales se declaran en `APP_ORIGINS`. Referencia: [variables de sistema de Vercel](https://vercel.com/docs/environment-variables/system-environment-variables).
+
+React llama a `/api` en el mismo dominio de la página. La validación admite únicamente los orígenes configurados, conserva la protección CSRF y no confía en un comodín `*.vercel.app` ni en el encabezado `Host` de la petición.
+
 Compose toma de `.env` la clave y configuración de Gemini. Si no existe `.env`, copiá `.env.example` y completá `GEMINI_API_KEY` antes de procesar documentos. El archivo `.env`, las bases locales, los archivos subidos y los backups se excluyen del contexto de construcción y de la imagen.
 
 Los datos del contenedor se guardan en el volumen persistente `app-data`, bajo `/data/app.sqlite3` y `/data/media`. **La primera ejecución crea una biblioteca vacía:** no importa ni modifica automáticamente los usuarios/documentos de la base local del proyecto. Los datos creados en Docker se conservan al reconstruir o detener los contenedores con `docker compose down`. Eliminar el volumen elimina esos datos; no uses `down -v` si querés conservarlos.
@@ -196,7 +200,7 @@ Los archivos `examples/cuestionario_inventado.{pdf,docx,xlsx,xls}` son inventado
 | --- | --- |
 | `APP_DEBUG` | `true` en local; usar `false` con HTTPS en producción |
 | `PORT` | Puerto del contenedor; `8000` si no se define, o el valor indicado por el hosting |
-| `APP_ORIGINS` | Orígenes permitidos para escrituras; localhost:8000 y localhost:5173 en local |
+| `APP_ORIGINS` | Orígenes completos permitidos, separados por comas; localhost:8000 y localhost:5173 en local. Se agregan las URLs de sistema de Vercel si están disponibles |
 | `GEMINI_API_KEY` | Credencial del servidor para procesar |
 | `GEMINI_MODEL` | `gemini-2.5-flash-lite` |
 | `GEMINI_TIMEOUT_SECONDS` | `90`, máximo `120` |
