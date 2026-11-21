@@ -1,0 +1,42 @@
+{
+  "titulo": "Cuestionario inventado de aprendizaje",
+  "idioma": "es",
+  "total_items": 5,
+  "items": [
+    {
+      "numero": 1,
+      "enunciado": "Disfruto aprender algo nuevo.",
+      "tipo": "escala_likert",
+      "alternativas": [{"valor": 0, "texto": "Nunca"}, {"valor": 1, "texto": "A veces"}, {"valor": 2, "texto": "Siempre"}],
+      "respuesta_correcta": null
+    },
+    {
+      "numero": 2,
+      "enunciado": "¿Cuánto es 2 + 2?",
+      "tipo": "seleccion_multiple",
+      "alternativas": [{"valor": "A", "texto": "3"}, {"valor": "B", "texto": "4"}, {"valor": "C", "texto": "5"}],
+      "respuesta_correcta": "B"
+    },
+    {
+      "numero": 3,
+      "enunciado": "Un triángulo tiene tres lados.",
+      "tipo": "verdadero_falso",
+      "alternativas": [{"valor": "V", "texto": "Verdadero"}, {"valor": "F", "texto": "Falso"}],
+      "respuesta_correcta": "V"
+    },
+    {
+      "numero": 4,
+      "enunciado": "Describa una actividad que disfruta.",
+      "tipo": "desarrollo",
+      "alternativas": [],
+      "respuesta_correcta": null
+    },
+    {
+      "numero": 5,
+      "enunciado": "Relacione cada figura con su número de lados: 1. Triángulo; 2. Cuadrado. Opciones: A. Tres lados; B. Cuatro lados.",
+      "tipo": "emparejamiento",
+      "alternativas": [{"valor": "A", "texto": "Tres lados"}, {"valor": "B", "texto": "Cuatro lados"}],
+      "respuesta_correcta": {"1": "A", "2": "B"}
+    }
+  ]
+}

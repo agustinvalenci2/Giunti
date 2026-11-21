@@ -1,0 +1,26 @@
+# Only application sources and build inputs enter the Docker build context.
+**
+!Dockerfile
+!.dockerignore
+!requirements.txt
+!requirements-lock.txt
+!alembic.ini
+!backend/
+!backend/**
+!migrations/
+!migrations/**
+!scripts/
+!scripts/__init__.py
+!scripts/start_container.py
+!frontend/
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/index.html
+!frontend/vite.config.js
+!frontend/src/
+!frontend/src/**
+
+**/__pycache__/
+**/*.py[cod]
+frontend/src/**/*.test.*
+frontend/src/test-setup.js
